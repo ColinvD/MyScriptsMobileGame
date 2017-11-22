@@ -2,28 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DrawScript : MonoBehaviour {
+public class DrawScript : MonoBehaviour
+{
 
     [SerializeField]
     private SpriteRenderer sprite;
     [SerializeField]
     private Material[] materials;
+    public List<GameObject> lines;
     public GameObject trailPrefab;
-    GameObject thisTrail;
-    Vector3 startPos;
-    Plane objPlane;
+    private GameObject thisTrail;
+    private Vector3 startPos;
+    private Plane objPlane;
+    [SerializeField]
+    private int chosenColor = 4;
+    private int layerOrder = 0;
 
     void Start()
     {
         objPlane = new Plane(Camera.main.transform.forward * -1, this.transform.position);
     }
 
-	// Update is called once per frame
-	void Update () {
+    // Update is called once per frame
+    void Update()
+    {
+        sprite.color = materials[chosenColor].color;
         if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0))
         {
             thisTrail = (GameObject)Instantiate(trailPrefab, this.transform.position, Quaternion.identity);
-            thisTrail.GetComponent<TrailRenderer>().material = materials[0];
+            thisTrail.GetComponent<TrailRenderer>().material = materials[chosenColor];
+            thisTrail.GetComponent<TrailRenderer>().sortingOrder = layerOrder;
+            lines.Add(thisTrail);
             Ray mRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             float rayDistance;
             if (objPlane.Raycast(mRay, out rayDistance))
@@ -47,6 +56,12 @@ public class DrawScript : MonoBehaviour {
             {
                 Destroy(thisTrail);
             }
+            layerOrder++;
         }
-	}
+    }
+
+    public void ChangeColor(int color)
+    {
+        chosenColor = color;
+    }
 }
